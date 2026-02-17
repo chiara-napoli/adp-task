@@ -15,19 +15,16 @@ provider "aws" {
 variable "project_name" {
     type 		= string
     description = "The name of the project"
-    default 	= "apt-sapienza-cloud-infra-2026"
 }
 
 variable "docker_image_tag" {
     type 		= string
     description = "The tag of the Docker image"
-    default 	= "v1.0"
 }
 
 variable "docker_image_architecture" {
     type 		= string
     description = "The CPU architecture of the Docker image"
-    default 	= "ARM64" #use ARM64 to match Apple Silicon (M-series) built images
 }
 
 # =========================================================================
