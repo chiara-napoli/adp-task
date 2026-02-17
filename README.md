@@ -235,7 +235,7 @@ cp terraform_tfvars_template.txt terraform.tfvars
 Edit `terraform.tfvars`:
 
 ```hcl
-project_name             = "apt-sapienza-fg-cloud-infra-2026"   # Use your initials
+project_name             = "apt-sapienza-fg-cloud-infra"   # Use your initials
 docker_image_tag         = "v1.0"
 docker_image_architecture = "ARM64"   # ARM64 for Apple Silicon, X86_64 for Intel/AMD
 ```
@@ -244,8 +244,8 @@ docker_image_architecture = "ARM64"   # ARM64 for Apple Silicon, X86_64 for Inte
 
 ```bash
 terraform init
-terraform plan      # Review the changes
-terraform apply     # Provision resources (type "yes" to confirm)
+terraform plan                  # Review the changes
+terraform apply --auto-approve  # Provision resources (type "yes" to confirm)
 ```
 
 Terraform will output:

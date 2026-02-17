@@ -1,6 +1,6 @@
 # Terraform variables for the project:
 # rename it to terraform.tfvars to use it
-project_name="apt-sapienza-[your-initials]-cloud-infra-2026"
+project_name="apt-sapienza-[your-initials]-cloud-infra"
 docker_image_tag="v1.0"
 docker_image_architecture="ARM64"   # use ARM64 to match Apple Silicon (M-series) built images
                                     # use "X86_64" to match Intel or AMD built images
