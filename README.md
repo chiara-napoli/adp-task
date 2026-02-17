@@ -37,7 +37,7 @@ This project is a **didactic lab** for the *Advanced Programming Techniques* cou
 1. **Define cloud infrastructure as code** — write declarative Terraform configurations to provision a full AWS environment (networking, storage, compute, IAM).
 2. **Containerize an application** — package a Python program into a Docker image, push it to a private container registry (ECR), and run it in a serverless compute environment.
 3. **Design a batch processing pipeline** — use Amazon S3 as a data lake with separate input/output prefixes, and AWS Batch with Fargate to execute the processing job without managing servers.
-4. **Understand IAM and security** — configure service roles, task execution roles, and least-privilege policies (with educational shortcuts noted in the code).
+4. **Understand IAM and security** — configure task execution roles, and least-privilege policies (with educational shortcuts noted in the code).
 
 The business logic is intentionally simple (summing numbers from a file) so that students can focus on the **cloud engineering and DevOps aspects** rather than the application logic itself.
 
@@ -128,7 +128,6 @@ The Terraform configuration (`main.tf`) provisions five logical layers:
 #### 3. IAM Roles
 | Role | Trusted Service | Purpose |
 |---|---|---|
-| Batch Service Role | `batch.amazonaws.com` | Allows AWS Batch to manage compute resources |
 | ECS Task Execution Role | `ecs-tasks.amazonaws.com` | Allows Fargate to pull images from ECR, write logs, and access S3 |
 
 > `AmazonS3FullAccess` is attached for educational simplicity — in production, scope this down to the specific bucket ARN.

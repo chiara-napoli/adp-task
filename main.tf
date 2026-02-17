@@ -103,26 +103,10 @@ resource "aws_ecr_repository" "bio_image_repo" {
 # 3. IAM ROLES (Permissions)
 # =========================================================================
 
-# --- Batch Service Role (Allows Batch to manage resources) ---
-data "aws_iam_policy_document" "batch_assume_role_policy_document" {
-	statement {
-		actions = ["sts:AssumeRole"]
-		principals {
-			type        = "Service"
-			identifiers = ["batch.amazonaws.com"]
-		}
-	}
-}
-
-resource "aws_iam_role" "batch_service_role" {
-	name = "${var.project_name}-batch-service-role"
-	assume_role_policy = data.aws_iam_policy_document.batch_assume_role_policy_document.json
-}
-
-resource "aws_iam_role_policy_attachment" "batch_service_role_policy_attachment" {
-	role       = aws_iam_role.batch_service_role.name
-	policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole"
-}
+# Note: For Fargate-based Batch compute environments, we use the AWS-managed
+# service-linked role (AWSServiceRoleForBatch) instead of a custom service role.
+# This role is automatically created by AWS and has all the required permissions
+# (including ecs:ListClusters) to manage Fargate resources.
 
 # --- ECS Task Execution Role (Allows Fargate to pull images & write logs) ---
 data "aws_iam_policy_document" "ecs_task_execution_role_policy_document" {
@@ -159,7 +143,6 @@ resource "aws_iam_role_policy_attachment" "s3_full_access_policy_attachment" {
 resource "aws_batch_compute_environment" "bio_compute" {
 	name                     = "${var.project_name}-compute-env"
 	type                     = "MANAGED"
-	service_role             = aws_iam_role.batch_service_role.arn
 	
 	compute_resources {
 		type               = "FARGATE"
