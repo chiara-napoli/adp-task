@@ -18,6 +18,18 @@ variable "project_name" {
     default 	= "apt-sapienza-cloud-infra-2026"
 }
 
+variable "docker_image_tag" {
+    type 		= string
+    description = "The tag of the Docker image"
+    default 	= "v1.0"
+}
+
+variable "docker_image_architecture" {
+    type 		= string
+    description = "The CPU architecture of the Docker image"
+    default 	= "ARM64" #use ARM64 to match Apple Silicon (M-series) built images
+}
+
 # =========================================================================
 # 1. NETWORK STACK (VPC, Subnets, IGW)
 # =========================================================================
@@ -181,13 +193,17 @@ resource "aws_batch_job_definition" "bio_job" {
 	platform_capabilities = ["FARGATE"]
 
 	container_properties = jsonencode({
-		image = "${aws_ecr_repository.bio_image_repo.repository_url}:latest" 	# For educational purposes only, in production use a specific version.
-																				# ---> Not safe for production
+		image = "${aws_ecr_repository.bio_image_repo.repository_url}:${var.docker_image_tag}"
 		# Resource requirements
 		resourceRequirements = [
 			{ type = "VCPU", value = "0.25" },
 			{ type = "MEMORY", value = "512" }
 		]
+		# Runtime platform for Fargate to run the container
+		runtimePlatform = {
+			operatingSystemFamily = "LINUX"
+			cpuArchitecture       = var.docker_image_architecture
+		}
 		# Roles
 		jobRoleArn       = aws_iam_role.ecs_task_execution_role.arn
 		executionRoleArn = aws_iam_role.ecs_task_execution_role.arn
