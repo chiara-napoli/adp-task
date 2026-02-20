@@ -1,4 +1,4 @@
-# APT Sapienza — Cloud Infrastructure Lab
+# APT Sapienza — Student's task
 
 **Advanced Programming Techniques** — Sapienza University of Rome
 
@@ -215,9 +215,9 @@ aptsapienza/
 ## Prerequisites
 
 - **AWS Account** with an IAM user/profile named `aptsapienza` (or update `main.tf`)
-- **Terraform** installed ([hashicorp.com/terraform](https://www.hashicorp.com/terraform))
+- **Terraform-local** installed
 - **Docker** installed and running
-- **AWS CLI** configured with the `aptsapienza` profile
+- **AWS-local CLI** configured with the `aptsapienza` profile
 - **Python 3.14+** (for local development only)
 
 ---
@@ -243,9 +243,9 @@ docker_image_architecture = "ARM64"   # ARM64 for Apple Silicon, X86_64 for Inte
 ### 2. Provision Infrastructure
 
 ```bash
-terraform init
-terraform plan                  # Review the changes
-terraform apply --auto-approve  # Provision resources (type "yes" to confirm)
+tflocal init
+tflocal plan                  # Review the changes
+tflocal apply --auto-approve  # Provision resources (type "yes" to confirm)
 ```
 
 Terraform will output:
@@ -258,7 +258,7 @@ Terraform will output:
 Upload the sample input file to S3:
 
 ```bash
-aws s3 cp input/addends.txt s3://$(terraform output -raw s3_bucket_name)/input/addends.txt \
+awslocal s3 cp input/addends.txt s3://$(tflocal output -raw s3_bucket_name)/input/addends.txt \
     --profile aptsapienza
 ```
 
@@ -279,10 +279,10 @@ This script:
 ### 5. Submit a Batch Job
 
 ```bash
-aws batch submit-job \
+awslocal batch submit-job \
     --job-name "my-first-job" \
-    --job-queue "$(terraform output -raw job_queue_name)" \
-    --job-definition "$(terraform output -raw job_queue_name | sed 's/-queue/-job/')" \
+    --job-queue "$(tflocal output -raw job_queue_name)" \
+    --job-definition "$(tflocal output -raw job_queue_name | sed 's/-queue/-job/')" \
     --profile aptsapienza \
     --region eu-west-1
 ```
@@ -294,7 +294,7 @@ Monitor the job in the [AWS Batch Console](https://eu-west-1.console.aws.amazon.
 Once the job status is `SUCCEEDED`, download the result:
 
 ```bash
-aws s3 cp s3://$(terraform output -raw s3_bucket_name)/output/sum.txt ./sum.txt \
+awslocal s3 cp s3://$(tflocal output -raw s3_bucket_name)/output/sum.txt ./sum.txt \
     --profile aptsapienza
 cat sum.txt
 ```
@@ -325,7 +325,7 @@ This will:
 Destroy all AWS resources when done to avoid charges:
 
 ```bash
-terraform destroy    # Type "yes" to confirm
+tflocal destroy    # Type "yes" to confirm
 ```
 
 > `force_destroy` on S3 and `force_delete` on ECR ensure a clean teardown even with existing objects/images.

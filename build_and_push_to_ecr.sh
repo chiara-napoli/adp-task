@@ -1,4 +1,4 @@
-#!/bin/bash
+##!/bin/bash
 set -e
 
 AWS_REGION="eu-west-1"
@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ── 1. Get the ECR Repository name from Terraform output ─────────────────
 echo "==> Retrieving ECR Repository name from Terraform output..."
-ECR_REPOSITORY_URL=$(terraform -chdir="${SCRIPT_DIR}" output -raw ecr_repository_url)
+ECR_REPOSITORY_URL=$(tflocal -chdir="${SCRIPT_DIR}" output -raw ecr_repository_url)
 if [[ -z "${ECR_REPOSITORY_URL}" ]]; then
     echo "ERROR: Could not retrieve ecr_repository_url from Terraform output." >&2
     echo "       Make sure you have run 'terraform apply' first." >&2
@@ -21,7 +21,7 @@ echo "    ECR URL without repository name: ${ECR_URL_NO_REPO}"
 
 # ── 2. Log in to AWS ECR ───────────────────────────────────────────────
 echo "1. Logging in to AWS ECR..."
-aws ecr get-login-password --region $AWS_REGION --profile $AWS_PROFILE | \
+awslocal ecr get-login-password --region $AWS_REGION --profile $AWS_PROFILE | \
     docker login --username AWS --password-stdin $ECR_URL_NO_REPO
 
 # ── 3. Build Docker Image ───────────────────────────────────────────────

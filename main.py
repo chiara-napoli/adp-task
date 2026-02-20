@@ -1,3 +1,53 @@
+import matplotlib.pyplot as plt
+
+def analyze_human_vcf(vcf_file, output_path):
+    transitions = 0
+    transversions = 0
+    positions = []  # Lista per salvare DOVE sono le mutazioni
+    
+    transition_pairs = {('A', 'G'), ('G', 'A'), ('C', 'T'), ('T', 'C')}
+
+    with open(vcf_file, 'r') as f:
+        for line in f:
+            if line.startswith('#'): continue
+            
+            cols = line.split('\t')
+            
+            pos = int(cols[1])
+            ref = cols[3]
+            alt = cols[4]
+            qual = float(cols[5])
+
+            # Filtro Qualità (> 20 è standard per dati grezzi)
+            if qual > 20 and len(ref) == 1 and len(alt) == 1:
+                positions.append(pos)
+                
+                if (ref, alt) in transition_pairs:
+                    transitions += 1
+                else:
+                    transversions += 1
+
+    # Calcolo statistiche
+    ratio = transitions / transversions if transversions > 0 else 0
+    print(f"\n--- Risultati Cromosoma 21 ---")
+    print(f"Totale Varianti trovate: {len(positions)}")
+    print(f"Rapporto Ti/Tv: {ratio:.2f}")
+
+    plt.figure(figsize=(12, 6))
+    
+    plt.hist(positions, bins=50, color='skyblue', edgecolor='black')
+    
+    plt.title('Densità delle Mutazioni sul Cromosoma 21')
+    plt.xlabel('Posizione sul Cromosoma (coppie di basi)')
+    plt.ylabel('Numero di Varianti')
+    plt.grid(axis='y', alpha=0.5)
+    
+    # Salva il grafico
+    plt.savefig(output_path)
+    print("Grafico salvato come 'variant_density_chr21.png'")
+    plt.show()
+
+
 """S3-based number adder script.
 
 This script downloads a file of numbers from an S3 input prefix,
@@ -193,12 +243,13 @@ if __name__ == "__main__":
     with tempfile.TemporaryDirectory() as tmp_dir_name:
         logger.info("Created temporary directory %s", tmp_dir_name)
         # Read the input file, containing the addends, from S3
-        input_tmp_file_path = os.path.join(tmp_dir_name, "addends.txt")
-        manager.read_data_from_input("addends.txt", input_tmp_file_path)
+        input_tmp_file_path = os.path.join(tmp_dir_name, "chr21_final.vcf")
+        manager.read_data_from_input("chr21_final.vcf", input_tmp_file_path)
         # Compute the sum of the addends
-        output_tmp_file_path = os.path.join(tmp_dir_name, "sum.txt")
-        adder = Adder(input_tmp_file_path, output_tmp_file_path)
-        adder.add()
+        output_tmp_file_path = os.path.join(tmp_dir_name, "output.png")
+        analyze_human_vcf(input_tmp_file_path, output_tmp_file_path)
+        #adder = Adder(input_tmp_file_path, output_tmp_file_path)
+        #adder.add()
         # Write the output file, containing the sum, to S3
-        manager.write_data_to_output(output_tmp_file_path, "sum.txt")
+        manager.write_data_to_output(output_tmp_file_path, "variant_density_chr21.png")
     # The temporary directory is automatically cleaned up when the 'with' block exits.

@@ -143,7 +143,7 @@ resource "aws_iam_role_policy_attachment" "s3_full_access_policy_attachment" {
 resource "aws_batch_compute_environment" "bio_compute" {
 	name                     = "${var.project_name}-compute-env"
 	type                     = "MANAGED"
-	
+	service_role             = aws_iam_role.batch_service_role.arn	
 	compute_resources {
 		type               = "FARGATE"
 		max_vcpus          = 16
@@ -217,4 +217,26 @@ output "s3_bucket_name" {
 output "job_queue_name" {
 	value = aws_batch_job_queue.bio_queue.name
 	description = "Submit jobs to this queue"
+}
+
+
+# --- Batch Service Role (Allows Batch to manage resources) ---
+data "aws_iam_policy_document" "batch_assume_role_policy_document" {
+	statement {
+		actions = ["sts:AssumeRole"]
+		principals {
+			type        = "Service"
+			identifiers = ["batch.amazonaws.com"]
+		}
+	}
+}
+
+resource "aws_iam_role" "batch_service_role" {
+	name = "${var.project_name}-batch-service-role"
+	assume_role_policy = data.aws_iam_policy_document.batch_assume_role_policy_document.json
+}
+
+resource "aws_iam_role_policy_attachment" "batch_service_role_policy_attachment" {
+	role       = aws_iam_role.batch_service_role.name
+	policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole"
 }
